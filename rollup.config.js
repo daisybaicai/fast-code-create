@@ -1,7 +1,7 @@
 import rollupResolve from '@rollup/plugin-node-resolve';
 import commonjs from 'rollup-plugin-commonjs';
 import json from '@rollup/plugin-json';
-import { terser } from 'rollup-plugin-terser';
+// import { terser } from 'rollup-plugin-terser';
 import { babel } from '@rollup/plugin-babel';
 
 export default {
@@ -20,7 +20,7 @@ export default {
     babel({
       babelHelpers: 'bundled',
       extensions: ['.js'],
-      exclude: /node_modules|babel/,
+      exclude: /node_modules|babel|prettier/,
       presets: [
         [
           '@babel/preset-env',

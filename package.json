@@ -78,6 +78,11 @@
 		"vscode-test": "^1.5.2"
 	},
 	"dependencies": {
+		"@babel/generator": "^7.20.14",
+		"@babel/parser": "^7.20.13",
+		"@babel/template": "^7.20.7",
+		"@babel/traverse": "^7.20.13",
+		"@babel/types": "^7.20.7",
 		"open": "^8.2.1",
 		"prettier": "^2.8.3"
 	}
