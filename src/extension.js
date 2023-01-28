@@ -9,7 +9,7 @@ const vscode = require('vscode');
  * @param {vscode.ExtensionContext} context
  */
 function activate(context) {
-	require('./src/vform-loader')(context)
+	require('./vform-loader')(context)
 }
 
 // this method is called when your extension is deactivated

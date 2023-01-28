@@ -3,7 +3,7 @@ const fs = require('fs')
 const path = require('path')
 const open = require('open')
 const DB_PATH = path.join(__dirname, './data/db.json')
-const strategy = path.join(__dirname, './strategy/index');
+const strategy = require('./strategy');
 
 function getExtensionFileAbsolutePath(context, relativePath) {
     return path.join(context.extensionPath, relativePath)
@@ -30,10 +30,14 @@ const methods = {
         let { fileName, code, text, options } = message.data
         // let filePath = path.join(dirPath, fileName)
         // fs.writeFileSync(filePath, code)
-        console.log('text123', typeof text, text)
+        console.log('text1235', typeof text, text)
         const result = JSON.parse(text);
-        const [actionType] = result;
-        strategy[actionType]({}, text, options);
+        const {actionType} = result;
+        strategy[actionType]({
+            paths: {
+                absSrcPath: dirPath + '/src'
+            }
+        }, text, options);
 
         // var handleText = function (type: any, text: any, api: any, options: any) {
         //     return strategy[type](api, text, options);
@@ -58,7 +62,7 @@ const methods = {
 }
 
 module.exports = function (context) {
-    context.subscriptions.push(vscode.commands.registerCommand('extension.openVFormMaker', (uri) => {
+    context.subscriptions.push(vscode.commands.registerCommand('extension.openCodeCreate', (uri) => {
         if (uri) {
             let dirPath = uri.fsPath,
                 stat = fs.lstatSync(dirPath)
@@ -69,8 +73,8 @@ module.exports = function (context) {
             pclintBar.show()
 
             const panel = vscode.window.createWebviewPanel(
-                'vFormMaker',
-                "VForm表单设计器",
+                'CodeCreate',
+                "CodeCreate设计器",
                 vscode.ViewColumn.One,
                 {
                     enableScripts: true, // 启用JS，默认禁用
@@ -88,8 +92,8 @@ module.exports = function (context) {
             panel.webview.postMessage({
                 cmd: 'setSrc',
                 data: {
-                    src: vscode.workspace.getConfiguration().get('VFormMaker.url'),
-                    db: JSON.parse(fs.readFileSync(DB_PATH).toString() || '{}')
+                    src: vscode.workspace.getConfiguration().get('CodeCreate.url'),
+                    // db: JSON.parse(fs.readFileSync(DB_PATH).toString() || '{}')
                 }
             })
             panel.webview.onDidReceiveMessage(message => {

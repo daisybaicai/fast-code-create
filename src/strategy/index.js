@@ -8,22 +8,42 @@ import handleDialog from './dialog';
 const strategy = {
     "form": function(api,text, options) {
         // form 
-        return handleForm(api,text, options);
+        try{
+            return handleForm(api,text, options);
+        }catch(err){
+            throw err
+        }
     },
     "detail" : function(api,text, options) {
-        return handleDetail(api,text, options);
+        try{
+            return handleDetail(api,text, options);
+        }catch(err){
+            throw err
+        }
     },
     "list" : function(api,text, options) {
-        return handleList(api,text, options);
+        try{
+            return handleList(api,text, options);
+        }catch(err){
+            throw err
+        }
     },
     // "api": function(api, text, options) {
     //     return handleApi(api, text, options);
     // },
     "action": function(api, text, options) {
-        return handleAction(api, text, options);
+        try{
+            return handleAction(api, text, options);
+        }catch(err){
+            throw err
+        }
     },
     "dialog": function(api, text, options) {
-        return handleDialog(api, text, options);
+        try{
+            return handleDialog(api, text, options);
+        }catch(err){
+            throw err
+        }
     },
 };
 
