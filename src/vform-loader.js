@@ -3,7 +3,7 @@ const fs = require('fs')
 const path = require('path')
 const open = require('open')
 const DB_PATH = path.join(__dirname, './data/db.json')
-const strategy = path.join(__dirname, './strategy/index');
+const strategy = require('./strategy/index');
 
 function getExtensionFileAbsolutePath(context, relativePath) {
     return path.join(context.extensionPath, relativePath)
@@ -28,12 +28,26 @@ function getWebViewContent(context, templatePath) {
 const methods = {
     writeFile: function (message, vscode, dirPath) {
         let { fileName, code, text, options } = message.data
+        console.log('d', dirPath);
         // let filePath = path.join(dirPath, fileName)
         // fs.writeFileSync(filePath, code)
-        console.log('text123', typeof text, text)
+        console.log('text1235', typeof text, text)
         const result = JSON.parse(text);
-        const [actionType] = result;
-        strategy[actionType]({}, text, options);
+
+
+        console.log('vscode', vscode.workspace.getConfiguration().get('VFormMaker.url'));
+        console.log("🚀 ~ file: vform-loader.js:35 ~ result", result)
+        const {actionType} = result;
+        console.log("🚀 ~ file: vform-loader.js:36 ~ actionType", actionType)
+
+        console.log('d', strategy);
+        console.log('3', strategy[actionType]);
+        
+        strategy[actionType]({
+            paths: {
+                absSrcPath: dirPath + '/src'
+            }
+        }, text, options);
 
         // var handleText = function (type: any, text: any, api: any, options: any) {
         //     return strategy[type](api, text, options);
@@ -64,13 +78,15 @@ module.exports = function (context) {
                 stat = fs.lstatSync(dirPath)
             if (stat.isFile()) dirPath = path.dirname(dirPath)
 
+            console.log('3', dirPath)
+
             let pclintBar = vscode.window.createStatusBarItem()
             pclintBar.text = `目标文件夹：${dirPath}`
             pclintBar.show()
 
             const panel = vscode.window.createWebviewPanel(
                 'vFormMaker',
-                "VForm表单设计器",
+                "CodeCreate设计器配置",
                 vscode.ViewColumn.One,
                 {
                     enableScripts: true, // 启用JS，默认禁用
@@ -85,6 +101,7 @@ module.exports = function (context) {
                 }
             })
             panel.webview.html = getWebViewContent(context, 'src/view/index.html')
+            console.log('from', vscode.workspace.getConfiguration().get('VFormMaker.url'));
             panel.webview.postMessage({
                 cmd: 'setSrc',
                 data: {

@@ -24,19 +24,19 @@
 	"contributes": {
 		"configuration": {
 			"type": "object",
-			"title": "VForm设计器配置",
+			"title": "CodeCreate设计器配置",
 			"properties": {
 				"VFormMaker.url": {
 					"type": "string",
 					"default": "https://dreamy-caramel-f1a27f.netlify.app",
-					"description": "VForm设计器远程URL"
+					"description": "CodeCreate设计器远程URL"
 				}
 			}
 		},
 		"commands": [
 			{
 				"command": "extension.openVFormMaker",
-				"title": "打开VForm设计器"
+				"title": "打开CodeCreate设计器"
 			}
 		],
 		"menus": {

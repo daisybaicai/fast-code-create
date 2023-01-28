@@ -1,9 +1,14 @@
-import { TYPES } from '../../common/enum';
-import { handleApi, handleComponents, handleModel } from '../common';
+// import { TYPES } from '../../common/enum';
+const { handleApi, handleComponents } = require('../common');
+
+const {TYPES} = require('../../common/enum')
+
 
 const handleList =  async (api, text, options) => {
   var jsonData = eval('(' + text + ')');
+  console.log("🚀 ~ file: index.js:6 ~ handleList ~ text", text)
 
+  
   // 类型处理
   if (typeof jsonData !== 'object') {
     return;
@@ -23,4 +28,5 @@ const handleList =  async (api, text, options) => {
   }
 };
 
-export default handleList;
+
+module.exports = handleList;
