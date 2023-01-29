@@ -124,7 +124,7 @@ export function getFormItems(params) {
   let res = ``;
   params.forEach(item => {
     res += `
-      <Col span={6}>
+      <Col {...LIST_FORM_LAYOUT} xl={8}>
         <Form.Item label="${item.description}" name="${item.name}">
           <Input placeholder="请输入" />
         </Form.Item>
@@ -159,12 +159,12 @@ const renderTypes = item => {
 
   if (item.formType === FORM_TYPES.DATE.code) {
     return `
-      <CustomDatePicker type="" />
+      <BaseDatePicker type="DATE" />
       `;
   }
   if (item.formType === FORM_TYPES.TIME.code) {
     return `
-      <CustomDatePicker 
+      <BaseDatePicker 
         picker="date"
         format="YYYY-MM-DD HH:mm"
         showTime={{

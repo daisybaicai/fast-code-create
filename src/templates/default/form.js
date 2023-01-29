@@ -1,59 +1,76 @@
-import {getColumns, prettify, getFormItemsInForm} from '../../utils/utils';
+import { getFormItemsInForm } from "../../utils/utils";
 
-const text = ({modelName, fetchName, params, response, loadItem = false}) => `import React, {useState} from 'react';
+const text = ({
+  fetchName,
+  params,
+  loadItem = false,
+}) => `import React, { useEffect, useState } from 'react';
+import { Card, Button, message, Form, Input, Row, Col } from 'antd';
+import { UploadOutlined } from '@ant-design/icons';
 import { PageContainer } from '@ant-design/pro-layout';
-import { Button, Form, Input, message } from 'antd';
-import { useRequest } from 'ahooks';
-import { getNormalRules } from '@/common/project';
-import loadApplyItem from '@/ApplyItem/loadApplyItem';
+import BaseDatePicker from '@/components/BaseDatePicker';
+import EmailSearch from '@/components/EmailSearch';
+import { UPLOAD_TYPE } from '@/components/FileUpload/fileUtils';
+import FileUpload from '@/components/FileUpload/index';
+import { LIST_FORM_LAYOUT, FORM_ITEM_TYPE } from '@/common/enum';
+import { PATTERN } from '@/common/pattern';
+import styles from './index.less';
 import { ${fetchName} } from '@/services/api';
+import { useRequest } from 'ahooks';
 
-const formItemLayout = {
-  labelCol: { span: 8 },
-  wrapperCol: { span: 8 },
-};
-
-export default function () {
+export default function FormApply() {
   const [form] = Form.useForm();
-  const [operate] = useState(true);
 
   const { run: submitForm, loading } = useRequest(${fetchName}, { manual: true });
 
-  const onFinish = (values) => {
-    submitForm(payload).then(res => {
-      if(res && res.code === 0) {
-        setData(res.data);
-        message.success(res.msg);
-      } else {
-        message.error(res?.msg);
-      }
-    })
+  const handleSubmit = () => {
+    form
+      .validateFields()
+      .then((value) => {
+        const data = {
+          ...value,
+        };
+        submitForm(data).then(res => {
+          message.success("提交成功")
+        }).catch(err => {
+          message.error("提交失败")
+        })
+      })
+      .catch((err) => {
+        message.error('请按要求填写表单');
+      });
   };
 
-
   return (
-    <PageContainer breadcrumb={null} title="表单">
-        <div >
-          <Form
-            {...formItemLayout}
-            name="register"
-            form={form}
-            onFinish={onFinish}
+    <div style={{ position: 'relative' }}>
+      <PageContainer
+        title="表单应用"
+        breadcrumb={null}
+        footer={
+          <Button
+            onClick={() => {
+              handleSubmit();
+            }}
+            type="primary"
+            loading={loading}
           >
-            ${
-              getFormItemsInForm(params, loadItem)
-            }
-            <Form.Item wrapperCol={{ span: 8, offset: 8 }} style={{ marginTop: '8px' }}>
-              <Button type="primary" htmlType="submit" loading={loading}>
-                提交
-              </Button>
-            </Form.Item>
-          </Form>
-        </div>
-    </PageContainer>
+            提交
+          </Button>
+        }
+      >
+        <Form
+          form={form}
+          name="form"
+          labelCol={{ span: 24 }}
+          wrapperCol={{ span: 24 }}
+        >
+          <Card bordered={false}>
+            ${getFormItemsInForm(params, loadItem)}
+          </Card>
+        </Form>
+      </PageContainer>
+    </div>
   );
 }
-
-  
-`
+`;
 export default text;
