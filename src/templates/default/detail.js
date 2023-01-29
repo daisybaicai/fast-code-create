@@ -1,52 +1,55 @@
-import { getColumns, prettify, getDetailInfos, getDetailParams } from '../../utils/utils';
+import { getDetailInfos, getDetailParams } from '../../utils/utils';
 
-const text = ({modelName, fetchName, clearName, stateName, params, response}) => `import React from 'react';
-import { Button, Col, Form, Row, Card, message, Descriptions  } from 'antd';
-import { useMount, useRequest} from 'ahooks';
-import { PageContainer } from '@ant-design/pro-layout';
-import { ${fetchName} } from '@/services/api';
+const text = ({fetchName, params, response}) => `
+import React, { useRef } from 'react';
+import { Card, message } from 'antd';
+import { PageContainer } from '@ant-design/pro-components';
+import { useRequest } from 'ahooks';
+import { formatObject } from '@/utils/format';
+import { ${fetchName}  } from '@/services/api';
 
-
-const Detail = (props) => {
+export default function Detail({ route = {},  match: { params }, }) {
   const {
-    match: { params },
-  } = props;
-
-  const { run: getDetail } = useRequest(${fetchName}, { manual: true });
-  const [data, setData] = useState({});
-
-  useMount(() => {
-    getDetail({
-      ${getDetailParams(params)}
-    }
-    ).then(res => {
-      if(res && res.code === 0) {
-        setData(res.data)
-      }
-    })
-  });
-
+    loading,
+    data: detail,
+    run: getDetail,
+  } = useRequest(
+    (v) =>
+      ${fetchName} ({
+        ${getDetailParams(params)},
+        ...v,
+      }),
+    {
+      onError: (res) => {
+        message.error(res?.message || '请求失败');
+      },
+      // 数据处理
+      formatResult: ({ data: res }) => {
+        return formatObject(res);
+      },
+    },
+  );
 
   ${
-    getDetailInfos(response, 'data')
+    getDetailInfos(response, 'detail')
   }
 
+
   return (
-    <PageContainer breadcrumb={null} title="详情">
+    <PageContainer title="列表详情" breadcrumb={null} loading={loading}>
       <Card bordered={false}>
-      <Descriptions title="User Info">
-        {
-          cardInfo?.map(item => (
-            <Descriptions.Item label={item.name} key={item.name}>{item.value}</Descriptions.Item>
-          ))
-        }
-      </Descriptions>
+        <Descriptions title="详情">
+          {
+            cardInfo?.map(item => (
+              <Descriptions.Item label={item.name} key={item.name}>{item.value}</Descriptions.Item>
+            ))
+          }
+        </Descriptions>
       </Card>
     </PageContainer>
   );
-};
+}
 
-export default Detail;
   
 `
 export default text;

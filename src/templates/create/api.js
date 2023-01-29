@@ -16,20 +16,18 @@ export default function(payload, options) {
 
   let requestUrl = "`${HOST}";
   requestUrl+= sliceApiUrl(url, options?.prefixHost);
-  if(getParams&& url.indexOf('{') === -1) {
-    requestUrl += '?${stringify(params)}';
-  }
   requestUrl+="`";
 
   const code = `
     \n
     // ${description}
-    export async function fetch${functionName}(${hasparams ? 'params': ''}) {
+    export async function fetch${functionName}(${hasparams ? 'params': ''}, options) {
       return request(${requestUrl}, {
         method: '${upperMethods}',
-        ${
-            (upperMethods !== 'GET' && hasparams) ? `data: params,`: ''
-        }
+        params: {
+          ...params,
+        },
+        ...(options || {})
       });
     }
   `;
