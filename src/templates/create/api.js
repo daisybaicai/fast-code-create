@@ -2,17 +2,18 @@ import {sliceApiUrl, urlTransform} from '../../utils/utils'
 /**
  * 生成api 配置
  * @param payload
+ * @options
+ * @checkParams 默认check， 如果不check，则走默认全部都生成相关params
  */
-export default function(payload, options) {
-  const { url, methods = 'GET', params, description } = payload;
+export default function(payload, options, checkParams = true) {
+  const { url, methods = 'GET', params = [], description } = payload;
 
   const upperMethods = methods.toUpperCase();
 
   const functionName = urlTransform(url, options?.prefix);
 
-  const hasparams = Array.isArray(params) && params.length > 0;
+  const hasparams = checkParams ? Array.isArray(params) && params.length > 0: true;
 
-  const getParams = hasparams && upperMethods === 'GET';
 
   let requestUrl = "`${HOST}";
   requestUrl+= sliceApiUrl(url, options?.prefixHost);
