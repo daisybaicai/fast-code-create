@@ -45,6 +45,14 @@ const methods = {
 
         vscode.window.showInformationMessage(`文件${text.slice(10)}创建成功`)
     },
+    createApi: function(message, vscode, dirPath) {
+        let { arr = [], options } = message.data
+        strategy["api"]({
+            paths: {
+                absSrcPath: dirPath + '/src'
+            }
+        }, arr, options);
+    },
     openUrl: function (message, vscode, dirPath) {
         //vscode.window.showInformationMessage(message.data.url)
         open(message.data.url)

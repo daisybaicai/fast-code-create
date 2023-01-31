@@ -3,7 +3,7 @@ import handleForm from './form/index';
 import handleDetail from './detail/index';
 import handleAction from './action/index';
 import handleDialog from './dialog';
-// import handleApi from './api/index';
+import handleApi from './api/index';
 
 const strategy = {
     "form": function(api,text, options) {
@@ -28,9 +28,13 @@ const strategy = {
             throw err
         }
     },
-    // "api": function(api, text, options) {
-    //     return handleApi(api, text, options);
-    // },
+    "api" : function(api,arr, options) {
+        try{
+            return handleApi(api,arr, options);
+        }catch(err){
+            throw err
+        }
+    },
     "action": function(api, text, options) {
         try{
             return handleAction(api, text, options);
