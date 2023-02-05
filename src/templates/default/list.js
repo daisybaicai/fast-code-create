@@ -97,7 +97,7 @@ export default function TableApply() {
       cancelText: '取消',
       icon: <QuestionCircleOutlined />,
       onOk: () => {
-        message.success(\`${operate}成功\`);
+        message.success(\`\${operate}成功\`);
         submit();
       },
     });
@@ -121,7 +121,7 @@ export default function TableApply() {
   };
 
   const columns = [
-    ${getColumnsNew(response)},
+    ${getColumnsNew(response).slice(1,-1)},
     {
       title: '操作',
       width: 200,
