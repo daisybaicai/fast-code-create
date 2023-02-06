@@ -4,6 +4,7 @@ import handleDetail from './detail/index';
 import handleAction from './action/index';
 import handleDialog from './dialog';
 import handleApi from './api/index';
+import handleFormExample from './formExample/index';
 
 const strategy = {
     "form": function(api,text, options) {
@@ -31,6 +32,13 @@ const strategy = {
     "api" : function(api,arr, options) {
         try{
             return handleApi(api,arr, options);
+        }catch(err){
+            throw err
+        }
+    },
+    "example" : function(api,arr, options) {
+        try{
+            return handleFormExample(api,arr, options);
         }catch(err){
             throw err
         }

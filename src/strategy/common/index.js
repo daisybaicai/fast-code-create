@@ -5,6 +5,7 @@ import defaultListTemplate from '../../templates/default/list';
 import defaultDetailTemplate from '../../templates/default/detail';
 import defaultFormTemplate from '../../templates/default/form'
 import defaultActionTemplate from '../../templates/default/action';
+import defaultFormExampleTemplate from '../../templates/default/formExample';
 import defaultApiModel from '../../templates/default/model';
 import traverseTemplates from '../../traverse/index';
 import { dirExists, getStat, readFile, writeFile } from '../../utils/fs';
@@ -24,6 +25,7 @@ const templatesEnum = {
   [TYPES.FORM]: defaultFormTemplate,
   [TYPES.ACTION]: defaultActionTemplate,
   [TYPES.DIALOG]: defaultActionTemplate,
+  [TYPES.EXAMPLE_FORM]: defaultFormExampleTemplate,
 }
 
 /**
@@ -101,7 +103,7 @@ const fileName  = str.substring(index + 1, str.length);
     // const file = await writeFile(PrefixPath + fileName, defaultApiTemplate)
   }
 
-  const {api, loadItem  = false} = jsonData;
+  const {api, loadItem  = false, ...rest} = jsonData;
 
   const fetchName = `fetch` + urlTransform(jsonData.api.url, options.prefix);
   // const saveName = `save` + urlTransform(jsonData.api.url, options.prefix);
@@ -109,7 +111,7 @@ const fileName  = str.substring(index + 1, str.length);
   // const stateName =  createStateName(urlTransform(jsonData.api.url, options.prefix), type);
 
   const payload = {
-    fetchName, params: api.params, response: api.response, loadItem
+    fetchName, params: api.params, response: api.response, loadItem, ...rest
   }
 
   const defaultTemplate = templatesEnum[type];

@@ -4,6 +4,7 @@ export const TYPES = {
     FORM: 'Form',
     ACTION: 'Action',
     DIALOG: 'Dialog',
+    EXAMPLE_FORM: 'Example',
 }
 
 export const FORM_TYPES = {
