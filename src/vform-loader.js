@@ -4,6 +4,7 @@ const path = require('path')
 const open = require('open')
 const DB_PATH = path.join(__dirname, './data/db.json')
 const strategy = require('./strategy');
+// const axios = require('axios');
 
 function getExtensionFileAbsolutePath(context, relativePath) {
     return path.join(context.extensionPath, relativePath)
