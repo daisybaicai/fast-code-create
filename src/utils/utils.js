@@ -265,3 +265,31 @@ export function getDetailParams(params) {
 
   return result;
 }
+
+/**
+ * 获取时间 20230208181434 类似格式
+ * @returns 
+ */
+export const getTime = () => {
+  let date = new Date()
+  let Y = date.getFullYear();
+  let M = (date.getMonth() + 1 < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1);
+  let D = date.getDate();
+  let h = date.getHours();
+  let m = date.getMinutes();
+  let s = date.getSeconds();
+  if (D < 10) {
+    D = '0' + D
+  }
+  if (h < 10) {
+    console.log(1);
+    h = '0' + h
+  }
+  if (m < 10) {
+    m = '0' + m
+  }
+  if (s < 10) {
+    s = '0' + s
+  }
+  return Y + M + D + h  + m +  + s
+};

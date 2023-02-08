@@ -2,7 +2,7 @@
 	"name": "fast-code-create",
 	"displayName": "fast-code-create",
 	"description": "a code generate with vue or react",
-	"version": "0.0.5",
+	"version": "0.0.6",
 	"engines": {
 		"vscode": "^1.0.0"
 	},
@@ -83,6 +83,7 @@
 		"@babel/template": "^7.20.7",
 		"@babel/traverse": "^7.20.13",
 		"@babel/types": "^7.20.7",
+		"axios": "^1.3.2",
 		"open": "^8.2.1",
 		"prettier": "^2.8.3"
 	}

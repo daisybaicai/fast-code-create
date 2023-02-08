@@ -2,6 +2,9 @@
 
 这个是我的插件
 
+### 0.0.6
+更新example下的操作，支持detail 和components下的baseForm 以及proForm生成，同时重components下的重复名称通过加上时间后缀区分。
+
 ### 0.0.5
 增加example模版
 
