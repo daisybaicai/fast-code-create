@@ -1,9 +1,9 @@
-import { getColumnsNew, getFormItems, prettify } from "../../utils/utils";
+import { getColumnsNew, getFormItems, prettify, getUrlPropsQueryConfig } from "../../utils/utils";
 
 const text = ({ fetchName, params, response }) => prettify(`import React from 'react';
 import { Card, Table, message, Button, Modal, Form, Space, Row, Col, Input } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
-import { PageContainer } from '@ant-design/pro-layout';
+import { PageContainer } from '@ant-design/pro-components';
 import { useRequest, Link } from '@umijs/max';
 import BasePopconfirm from '@/components/BasePopconfirm';
 import { formatTimeToDateSecond } from '@/utils/format';
@@ -14,7 +14,7 @@ import { LIST_FORM_LAYOUT, OPERATE_TYPE } from '@/common/enum';
 import { ${fetchName} } from '@/services/api';
 
 const urlPropsQueryConfig = {
-  name: { type: UrlQueryParamTypes.string },
+  ${getUrlPropsQueryConfig(params)}
   pageNo: { type: UrlQueryParamTypes.number },
   pageSize: { type: UrlQueryParamTypes.number },
 };
@@ -93,7 +93,7 @@ const List = ({
         id: modalParams.params?.id,
       };
       console.log('payload', payload);
-      //TODO: 新增/修改请求
+      // TODO: 新增/修改请求
       message.success(\`\${operateDesc}成功\`);
       modalParams.hideModal();
       refresh();
@@ -103,7 +103,7 @@ const List = ({
   // 删除规则
   const handleDelete = (id) => {
     console.log('id', id);
-    //TODO: 删除请求
+    // TODO: 删除请求
     message.success('删除成功');
     refresh();
   };
