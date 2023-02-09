@@ -116,6 +116,20 @@ export function getColumnsNew(properties = []) {
   return JSON.stringify(columns);
 }
 
+
+/**
+ * 转换urlPropsQueryConfig
+ * @param {*} params
+ */
+export function getUrlPropsQueryConfig(params = []) {
+  let res = ``;
+  params.forEach(item => {
+    res += `
+  ${item.name}: { type: UrlQueryParamTypes.string },`;
+  });
+  return res;
+}
+
 /**
  * 转换Form.Items
  * @param {*} params

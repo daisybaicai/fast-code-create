@@ -12,8 +12,6 @@ export default function(payload, options, checkParams = true) {
 
   const functionName = urlTransform(url, options?.prefix);
 
-  const hasparams = checkParams ? Array.isArray(params) && params.length > 0: true;
-
 
   let requestUrl = "`${HOST}";
   requestUrl+= sliceApiUrl(url, options?.prefixHost);
@@ -22,7 +20,7 @@ export default function(payload, options, checkParams = true) {
   const code = `
     \n
     // ${description}
-    export async function fetch${functionName}(${hasparams ? 'params': ''}, options) {
+    export async function fetch${functionName}(params = {}, options) {
       return request(${requestUrl}, {
         method: '${upperMethods}',
         params: {
@@ -33,5 +31,6 @@ export default function(payload, options, checkParams = true) {
     }
   `;
 
+  console.log('code', code)
   return code;
 }
