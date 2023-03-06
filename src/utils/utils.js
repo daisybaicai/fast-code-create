@@ -13,13 +13,13 @@ export function urlTransform(url, prefix = '/api') {
   // 处理前缀
   if (Array.isArray(prefix)) {
     prefix.forEach(pKey => {
-      nameStr = nameStr.replace(new RegExp(pKey, 'i'), '');
+      nameStr = nameStr.replace(/-/g, '').replace(new RegExp(pKey, 'i'), '');
     });
   } else {
-    nameStr = nameStr.replace(new RegExp(prefix, 'i'), '');
+    nameStr = nameStr.replace(/-/g, '').replace(new RegExp(prefix, 'i'), '');
   }
 
-  const urlSlice = nameStr.replace(/\/$/, '').replace(/\/\:\w+$/, '');
+  const urlSlice = nameStr.replace(/-/g, '').replace(/\/$/, '').replace(/\/\:\w+$/, '');
 
   // 去除最后可能是{id}形式的文字
   const resultSlice = urlSlice.replace(/{(\w+)}/, '');
