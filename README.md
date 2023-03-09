@@ -2,6 +2,12 @@
 
 这个是我的插件
 
+### 0.0.9
+- 修改列表的默认模板
+- 修复生成api query以及body类型问题
+
+### 0.0.8
+修复url中存在-无法生成的问题
 ### 0.0.7
 增加list下的urlPropsQueryConfig 对应 search
 
