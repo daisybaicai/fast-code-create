@@ -17,15 +17,17 @@ export default function(payload, options, checkParams = true) {
   requestUrl+= sliceApiUrl(url, options?.prefixHost);
   requestUrl+="`";
 
+  // 参数类型 body / query
+  const paramsInType = params.some(item => item.in === 'body') ? 'body' : 'query';
+  
+
   const code = `
     \n
     // ${description}
     export async function fetch${functionName}(params = {}, options) {
       return request(${requestUrl}, {
         method: '${upperMethods}',
-        params: {
-          ...params,
-        },
+        ${paramsInType === 'body' ? 'data: params,': 'params: {\n ...params, \n},'}
         ...(options || {})
       });
     }
