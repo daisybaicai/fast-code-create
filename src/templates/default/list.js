@@ -177,6 +177,9 @@ const List = ({
                 title: '新增规则',
               },
             });
+            if (modalForm && typeof modalForm.resetFields === 'function') {
+              modalForm.resetFields();
+            }
           }}
           style={{ marginBottom: 20, float: 'right' }}
         >
