@@ -1,6 +1,8 @@
-import { FORM_ITEM_TYPE } from '../../common/enum';
+import { FORM_ITEM_TYPE } from "../../common/enum";
 
-export const baseFormText = (params) => `import React, { forwardRef, useEffect, useImperativeHandle } from 'react';
+export const baseFormText = (
+  params
+) => `import React, { forwardRef, useEffect, useImperativeHandle } from 'react';
 import { Checkbox, Col, Form, Input, InputNumber, Radio, Row, Select } from 'antd';
 import { EditableProTable, ProFormDigitRange } from '@ant-design/pro-components';
 import ApplyItem from '@/components/ApplyItem';
@@ -118,10 +120,9 @@ const BaseForm = React.memo(
   }),
 );
 
-export default BaseForm;`
+export default BaseForm;`;
 
-
-const renderFormItemType = (type) => {
+const renderFormItemType = (type, v) => {
   switch (type) {
     case FORM_ITEM_TYPE.INPUT.code:
       return `<Input placeholder="请输入" />`;
@@ -181,7 +182,14 @@ const renderFormItemType = (type) => {
       return `<ProFormDigitRange 
                 name="numRange"
                 label="数值区间"
-                colProps={FORM_LAYOUT}
+                colProps={${
+                  v.formCol === "8"
+                    ? "FORM_LAYOUT"
+                    : `{
+                    ...FORM_LAYOUT,
+                    xl: ${v.formCol}
+                  }`
+                }}
                 fieldProps={{ precision: 2 }}
                 rules={[
                   {
@@ -236,37 +244,365 @@ const renderFormItemType = (type) => {
   }
 };
 
-
 const baseRenderText = (params) => {
-  let result = ''
-  params.forEach(v => {
+  let result = "";
+  params.forEach((v) => {
     // 跳过非formItem的字段
-    if(!v.isFormItem) {
+    if (!v.isFormItem) {
       return;
     }
-    result +=`
+    result += `
     <Form.Item
       name="${v.name}"
       label="${v.description}"
       colProps={${
-        v.formCol === '8' ? 'FORM_LAYOUT' : `{
+        v.formCol === "8"
+          ? "FORM_LAYOUT"
+          : `{
           ...FORM_LAYOUT,
           xl: ${v.formCol}
         }`
       }}
       rules={getNormalRules('${v.description}', {
-        ${params.formPattern ? `pattern: PATTERN.${params.formPattern},`: ''}
+        ${v.formPattern ? `pattern: PATTERN.${v.formPattern},` : ""}
       })}
       validateFirst
     >
-      {loadApplyItem(${renderFormItemType(v.type)}, !readonly)}
+      {loadApplyItem(${renderFormItemType(v.type, v)}, !readonly)}
     </Form.Item>
-    `
-  })
+    `;
+  });
   return result;
-}
+};
 
-export const proFormText = `import React, { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
+const proRenderText = (params) => {
+  let result = "";
+  params.forEach((v) => {
+    // 跳过非formItem的字段
+    if (!v.isFormItem) {
+      return;
+    }
+    result += `
+    ${renderProFormItemType(v)}
+    `;
+  });
+  return result;
+};
+
+
+const renderProFormItemType = (v) => {
+  switch (v.type) {
+    case FORM_ITEM_TYPE.INPUT.code:
+      return `
+      <ProFormText
+      name="${v.name}"
+      label="${v.description}"
+      colProps={${
+        v.formCol === "8"
+          ? "FORM_LAYOUT"
+          : `{
+          ...FORM_LAYOUT,
+          xl: ${v.formCol}
+        }`
+      }}
+      rules={getNormalRules('${v.description}', {
+        ${v.formPattern ? `pattern: PATTERN.${v.formPattern},` : ""}
+      })}
+      validateFirst
+    />`;
+    case FORM_ITEM_TYPE.SELECT.code:
+      return `           <ProFormSelect
+      name="${v.name}"
+      label="${v.description}}"
+      colProps={${
+        v.formCol === "8"
+          ? "FORM_LAYOUT"
+          : `{
+          ...FORM_LAYOUT,
+          xl: ${v.formCol}
+        }`
+      }}
+      options={[
+        {
+          value: 'enable',
+          label: '启用中',
+        },
+        {
+          value: 'disable',
+          label: '禁用中',
+        },
+      ]}
+      rules={getNormalRules('${v.description}', { select: true })}
+      validateFirst
+    />`;
+    case FORM_ITEM_TYPE.RADIO.code:
+      return `          <ProFormRadio.Group
+      name="${v.name}"
+      label="${v.description}}"
+      colProps={${
+        v.formCol === "8"
+          ? "FORM_LAYOUT"
+          : `{
+          ...FORM_LAYOUT,
+          xl: ${v.formCol}
+        }`
+      }}
+      radioType="button"
+      fieldProps={{
+        buttonStyle: 'solid',
+      }}
+      options={[
+        {
+          label: '工业',
+          value: 'a',
+        },
+        {
+          label: '农业',
+          value: 'b',
+        },
+      ]}
+      rules={getNormalRules('${v.description}', { select: true })}
+      validateFirst
+    />`;
+    case FORM_ITEM_TYPE.CHECKBOX.code:
+      return `<ProFormCheckbox.Group
+      name="${v.name}"
+      label="${v.description}}"
+      colProps={${
+        v.formCol === "8"
+          ? "FORM_LAYOUT"
+          : `{
+          ...FORM_LAYOUT,
+          xl: ${v.formCol}
+        }`
+      }}
+      options={['A', 'B', 'C', 'D', 'E', 'F']}
+      rules={getNormalRules('${v.description}', { select: true })}
+      validateFirst
+    />`;
+    case FORM_ITEM_TYPE.TEXT_AREA.code:
+      return `
+      <ProFormTextArea
+      name="${v.name}"
+      label="${v.description}}"
+      colProps={${
+        v.formCol === "8"
+          ? "FORM_LAYOUT"
+          : `{
+          ...FORM_LAYOUT,
+          xl: ${v.formCol}
+        }`
+      }}
+      rules={getNormalRules('${v.description}', { maxLen: 200 })}
+      fieldProps={{ showCount: true, maxLength: 200 }}
+    />
+      `;
+    case FORM_ITEM_TYPE.EMAIL.code:
+      return `<Col
+      ${
+        v.formCol === "8"
+          ? "{...FORM_LAYOUT}"
+          : `{
+          ...FORM_LAYOUT,
+          xl: ${v.formCol}
+        }`
+      }
+      >
+      <ProForm.Item
+        name="${v.name}"
+        label="${v.description}}"
+        rules={getNormalRules('${v.description}', {
+          pattern: PATTERN.EMAIL,
+          validateLen: false,
+        })}
+        validateFirst
+      >
+        {loadApplyItem(<EmailSearch placeholder="请输入邮箱" />, !readonly)}
+      </ProForm.Item>
+    </Col>`;
+    case FORM_ITEM_TYPE.DATE.code:
+      return `
+      <Col       ${
+        v.formCol === "8"
+          ? "{...FORM_LAYOUT}"
+          : `{
+          ...FORM_LAYOUT,
+          xl: ${v.formCol}
+        }`
+      }>
+      <ProForm.Item
+          name="${v.name}"
+          label="${v.description}}"
+          rules={getNormalRules('${v.description}', {
+            select: true,
+          })}
+        validateFirst
+      >
+        {loadApplyItem(
+          <BaseDatePicker
+            type={FORM_ITEM_TYPE.DATE.code}
+            placeholder="请选择日期"
+            formatTimeStamp={false}
+          />,
+          !readonly,
+        )}
+      </ProForm.Item>
+    </Col>
+      
+      `;
+    case FORM_ITEM_TYPE.NUM_RANGE.code:
+      return `<ProFormDigitRange 
+                name="numRange"
+                label="数值区间"
+                colProps={${
+                  v.formCol === "8"
+                    ? "FORM_LAYOUT"
+                    : `{
+                    ...FORM_LAYOUT,
+                    xl: ${v.formCol}
+                  }`
+                }}
+                fieldProps={{ precision: 2 }}
+                rules={[
+                  {
+                    validator: (_, val) => {
+                      const [num1, num2] = val || [];
+                      if (!val || num1 === undefined || num2 === undefined) {
+                        return Promise.reject(new Error('请输入数值'));
+                      }
+                      return Promise.resolve();
+                    },
+                  },
+                ]}
+                validateTrigger="onBlur"
+                required
+                readonly={readonly}
+              />`;
+    case FORM_ITEM_TYPE.NUM.code:
+      return `<ProFormDigit
+      fieldProps={{ precision: 0 }}
+      name="${v.name}"
+      label="${v.description}}"
+      colProps={${
+        v.formCol === "8"
+          ? "FORM_LAYOUT"
+          : `{
+          ...FORM_LAYOUT,
+          xl: ${v.formCol}
+        }`
+      }}
+      rules={getNormalRules('${v.description}', { validateLen: false })}
+      validateFirst
+      min={0}
+      max={999999}
+    />`;
+    case FORM_ITEM_TYPE.FILE.code:
+      return `
+      <Col       ${
+        v.formCol === "8"
+          ? "{...FORM_LAYOUT}"
+          : `{
+          ...FORM_LAYOUT,
+          xl: ${v.formCol}
+        }`
+      }>
+      <ProForm.Item
+      name="${v.name}"
+      label="${v.description}}"
+        rules={[
+          {
+            validator: (_, val) => {
+              if (isEmptyArray(val)) {
+                return Promise.reject(new Error('请上传${v.description}'));
+              }
+              return Promise.resolve();
+            },
+          },
+        ]}
+        validateFirst
+        required
+      >
+        <FileUpload
+          accept={['pdf', 'doc', 'docx']}
+          fileLen={1}
+          limitSize={20}
+          uploadType={UPLOAD_TYPE.BUTTON.code}
+          action={ACTION}
+          tooltipTitle="仅支持.pdf,.doc,.docx后缀的文件，文件大小不得超过20M"
+          readonly={readonly}
+        />
+      </ProForm.Item>
+    </Col>
+      `;
+    case FORM_ITEM_TYPE.CASCADER.code:
+      return `
+      <Col       ${
+        v.formCol === "8"
+          ? "{...FORM_LAYOUT}"
+          : `{
+          ...FORM_LAYOUT,
+          xl: ${v.formCol}
+        }`
+      }>
+      <ProForm.Item
+      name="${v.name}"
+      label="${v.description}}"
+        rules={[
+          {
+            validator: (_, val) => {
+              if (!val || isEmptyArray(val)) {
+                return Promise.reject(new Error('请选择${v.description}'));
+              }
+              return Promise.resolve();
+            },
+          },
+        ]}
+        validateFirst
+        required
+      >
+        {loadApplyItem(
+          <BaseCascader
+            placeholder="请选择"
+            defaultOptions={defaultOptions}
+            isFetch={false}
+            fieldNames={{ label: 'label', value: 'value' }}
+            changeOnSelect={false}
+          />,
+          !readonly,
+          'text',
+          (val) => val?.join('/') || '-',
+        )}
+      </ProForm.Item>
+    </Col>`;
+    case FORM_ITEM_TYPE.RICH_TEXT.code:
+      return `<ProFormRichText
+                name="richText"
+                label="富文本"
+                colProps={{ ...FORM_LAYOUT, xl: 16 }}
+                validateFirst
+              />`;
+    default:
+      return `
+        <ProFormText
+        name="${v.name}"
+        label="${v.description}"
+        colProps={${
+          v.formCol === "8"
+            ? "FORM_LAYOUT"
+            : `{
+            ...FORM_LAYOUT,
+            xl: ${v.formCol}
+          }`
+        }}
+        rules={getNormalRules('${v.description}', {
+          ${v.formPattern ? `pattern: PATTERN.${v.formPattern},` : ""}
+        })}
+        validateFirst
+      />`;
+  }
+};
+
+export const proFormText = (params) => `import React, { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
 import { Col } from 'antd';
 import {
   EditableProTable,
@@ -363,232 +699,18 @@ const TemplatesForm = React.memo(
         requiredMark={!readonly}
       >
         <ProForm.Group>
-          <ProFormText
-            name="entName"
-            label="企业名称"
-            colProps={FORM_LAYOUT}
-            rules={getNormalRules('企业名称', {
-              pattern: PATTERN.CH_EN,
-              maxLen: 20,
-            })}
-            validateFirst
-          />
-          <ProFormText
-            name="endCode"
-            label="统一社会信用代码"
-            colProps={FORM_LAYOUT}
-            rules={getNormalRules('统一社会信用代码', {
-              pattern: PATTERN.CREDIT_CODE,
-              validateLen: false,
-            })}
-            validateTrigger="onBlur"
-            validateFirst
-          />
-          <ProFormText
-            name="mobile"
-            label="联系方式"
-            colProps={FORM_LAYOUT}
-            rules={getNormalRules('联系方式', {
-              pattern: PATTERN.PHONE,
-              validateLen: false,
-            })}
-            validateTrigger="onBlur"
-            validateFirst
-          />
-          <ProFormSelect
-            name="status"
-            label="企业状态"
-            colProps={FORM_LAYOUT}
-            options={[
-              {
-                value: 'enable',
-                label: '启用中',
-              },
-              {
-                value: 'disable',
-                label: '禁用中',
-              },
-            ]}
-            rules={getNormalRules('企业状态', { select: true })}
-            validateFirst
-          />
-          <ProFormRadio.Group
-            name="type"
-            label="企业类型"
-            radioType="button"
-            fieldProps={{
-              buttonStyle: 'solid',
-            }}
-            colProps={FORM_LAYOUT}
-            options={[
-              {
-                label: '工业',
-                value: 'a',
-              },
-              {
-                label: '农业',
-                value: 'b',
-              },
-            ]}
-            rules={getNormalRules('企业类型', { select: true })}
-            validateFirst
-          />
-          <ProFormCheckbox.Group
-            name="level"
-            label="级别"
-            colProps={FORM_LAYOUT}
-            options={['A', 'B', 'C', 'D', 'E', 'F']}
-            rules={getNormalRules('级别', { select: true })}
-            validateFirst
-          />
-        </ProForm.Group>
-        <ProForm.Group>
-          <ProFormTextArea
-            name="address"
-            label="联系地址"
-            colProps={{
-              ...FORM_LAYOUT,
-              xl: 16,
-            }}
-            fieldProps={{ showCount: true, maxLength: 200 }}
-          />
-        </ProForm.Group>
-        <ProForm.Group>
-          <Col {...FORM_LAYOUT}>
-            <ProForm.Item
-              name="email"
-              label="邮箱"
-              rules={getNormalRules('邮箱', {
-                pattern: PATTERN.EMAIL,
-                validateLen: false,
-              })}
-              validateFirst
-            >
-              {loadApplyItem(<EmailSearch placeholder="请输入邮箱" />, !readonly)}
-            </ProForm.Item>
-          </Col>
-          <Col {...FORM_LAYOUT}>
-            <ProForm.Item
-              name="date"
-              label="日期"
-              rules={getNormalRules('日期', {
-                select: true,
-              })}
-              validateFirst
-            >
-              {loadApplyItem(
-                <BaseDatePicker
-                  type={FORM_ITEM_TYPE.DATE.code}
-                  placeholder="请选择日期"
-                  formatTimeStamp={false}
-                />,
-                !readonly,
-              )}
-            </ProForm.Item>
-          </Col>
-          <ProFormDigitRange
-            name="numRange"
-            label="数值区间"
-            colProps={FORM_LAYOUT}
-            fieldProps={{ precision: 2 }}
-            rules={[
-              {
-                validator: (_, val) => {
-                  const [num1, num2] = val || [];
-                  if (!val || num1 === undefined || num2 === undefined) {
-                    return Promise.reject(new Error('请输入数值'));
-                  }
-                  return Promise.resolve();
-                },
-              },
-            ]}
-            validateTrigger="onBlur"
-            validateFirst
-            required
-          />
-          <ProFormDigit
-            name="num"
-            label="单一数值"
-            colProps={FORM_LAYOUT}
-            fieldProps={{ precision: 0 }}
-            rules={getNormalRules('数值', {
-              required: true,
-              validateLen: false,
-            })}
-            validateFirst
-            min={0}
-            max={999999}
-          />
-          <Col {...FORM_LAYOUT}>
-            <ProForm.Item
-              label="附件"
-              name="file"
-              rules={[
-                {
-                  validator: (_, val) => {
-                    if (isEmptyArray(val)) {
-                      return Promise.reject(new Error('请上传附件'));
-                    }
-                    return Promise.resolve();
-                  },
-                },
-              ]}
-              validateFirst
-              required
-            >
-              <FileUpload
-                accept={['pdf', 'doc', 'docx']}
-                fileLen={1}
-                limitSize={20}
-                uploadType={UPLOAD_TYPE.BUTTON.code}
-                action={ACTION}
-                tooltipTitle="仅支持.pdf,.doc,.docx后缀的文件，文件大小不得超过20M"
-                readonly={readonly}
-              />
-            </ProForm.Item>
-          </Col>
-          <Col {...FORM_LAYOUT}>
-            <ProForm.Item
-              name="area"
-              label="地区（级联）"
-              rules={[
-                {
-                  validator: (_, val) => {
-                    if (!val || isEmptyArray(val)) {
-                      return Promise.reject(new Error('请选择地区'));
-                    }
-                    return Promise.resolve();
-                  },
-                },
-              ]}
-              validateFirst
-              required
-            >
-              {loadApplyItem(
-                <BaseCascader
-                  placeholder="请选择"
-                  defaultOptions={defaultOptions}
-                  isFetch={false}
-                  fieldNames={{ label: 'label', value: 'value' }}
-                  changeOnSelect={false}
-                />,
-                !readonly,
-                'text',
-                (val) => val?.join('/') || '-',
-              )}
-            </ProForm.Item>
-          </Col>
+          ${proRenderText(params)}
         </ProForm.Group>
       </ProForm>
     );
   }),
 );
 
-export default TemplatesForm;`
+export default TemplatesForm;`;
 
-const defaultFormExampleTemplate = ({isProForm = false, params = []}) => {
+const defaultFormExampleTemplate = ({ isProForm = false, params = [] }) => {
   // console.log(baseFormText(params))
-  return isProForm ? proFormText: baseFormText(params);
-}
+  return isProForm ? proFormText(params) : baseFormText(params);
+};
 
 export default defaultFormExampleTemplate;
