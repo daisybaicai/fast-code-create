@@ -36,7 +36,7 @@ const strategy = {
             throw err
         }
     },
-    "example" : function(api,arr, options) {
+    "form-detail" : function(api,arr, options) {
         try{
             return handleFormExample(api,arr, options);
         }catch(err){
