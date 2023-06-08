@@ -268,7 +268,7 @@ const baseRenderText = (params) => {
       })}
       validateFirst
     >
-      {loadApplyItem(${renderFormItemType(v.type, v)}, !readonly)}
+      {loadApplyItem(${renderFormItemType(v.formType, v)}, !readonly)}
     </Form.Item>
     `;
   });
@@ -291,7 +291,7 @@ const proRenderText = (params) => {
 
 
 const renderProFormItemType = (v) => {
-  switch (v.type) {
+  switch (v.formType) {
     case FORM_ITEM_TYPE.INPUT.code:
       return `
       <ProFormText
