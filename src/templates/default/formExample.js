@@ -1,8 +1,12 @@
 import { FORM_ITEM_TYPE } from "../../common/enum";
+import { removeUnusedCode } from "../../utils/code";
+import { prettify } from "../../utils/utils";
 
 export const baseFormText = (
   params
-) => `import React, { forwardRef, useEffect, useImperativeHandle } from 'react';
+) => `
+import React, { forwardRef, useEffect, useImperativeHandle } from 'react';
+import QuillEditer from '@/components/QuillEditer';
 import { Checkbox, Col, Form, Input, InputNumber, Radio, Row, Select } from 'antd';
 import { EditableProTable, ProFormDigitRange } from '@ant-design/pro-components';
 import ApplyItem from '@/components/ApplyItem';
@@ -12,8 +16,9 @@ import BaseDatePicker from '@/components/BaseDatePicker';
 import EmailSearch from '@/components/EmailSearch';
 import FileUpload from '@/components/FileUpload';
 import { UPLOAD_TYPE } from '@/components/FileUpload/fileUtils';
-import { useProTableParams } from '@/utils/hooks';
+import { useEditableProTableParams } from '@/utils/hooks';
 import { isEmptyArray } from '@/utils/utils';
+import { FORM_ITEM_TYPE } from '@/common/enum';
 import { PATTERN } from '@/common/pattern';
 import { getNormalRules } from '@/common/project';
 
@@ -233,12 +238,7 @@ const renderFormItemType = (type, v) => {
                 changeOnSelect={false}
               />`;
     case FORM_ITEM_TYPE.RICH_TEXT.code:
-      return `<ProFormRichText
-                name="richText"
-                label="富文本"
-                colProps={{ ...FORM_LAYOUT, xl: 16 }}
-                validateFirst
-              />`;
+      return `<QuillEditer />`;
     default:
       return `<Input placeholder="请输入" />`;
   }
@@ -251,6 +251,11 @@ const baseRenderText = (params) => {
     if (!v.isFormItem) {
       return;
     }
+    if(v.formType === FORM_ITEM_TYPE.NUM_RANGE.code) {
+      result += `${renderFormItemType(v.formType, v)}`
+      return;
+    }
+
     result += `
     <Form.Item
       name="${v.name}"
@@ -575,12 +580,29 @@ const renderProFormItemType = (v) => {
       </ProForm.Item>
     </Col>`;
     case FORM_ITEM_TYPE.RICH_TEXT.code:
-      return `<ProFormRichText
-                name="richText"
-                label="富文本"
-                colProps={{ ...FORM_LAYOUT, xl: 16 }}
+              return `
+              <Col ${
+                v.formCol === "8"
+                  ? "{...FORM_LAYOUT}"
+                  : `{
+                  ...FORM_LAYOUT,
+                  xl: ${v.formCol}
+                }`
+              }>
+              <ProForm.Item
+                  name="${v.name}"
+                  label="${v.description}}"
+                  rules={getNormalRules('${v.description}', {
+                  })}
                 validateFirst
-              />`;
+              >
+                {loadApplyItem(
+                  <QuillEditer />,
+                  !readonly,
+                )}
+              </ProForm.Item>
+            </Col>
+              `;
     default:
       return `
         <ProFormText
@@ -602,8 +624,10 @@ const renderProFormItemType = (v) => {
   }
 };
 
-export const proFormText = (params) => `import React, { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
+export const proFormText = (params) => `
+import React, { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
 import { Col } from 'antd';
+import QuillEditer from '@/components/QuillEditer';
 import {
   EditableProTable,
   ProForm,
@@ -622,7 +646,7 @@ import BaseDatePicker from '@/components/BaseDatePicker';
 import EmailSearch from '@/components/EmailSearch';
 import FileUpload from '@/components/FileUpload';
 import { UPLOAD_TYPE } from '@/components/FileUpload/fileUtils';
-import { useProTableParams } from '@/utils/hooks';
+import { useEditableProTableParams } from '@/utils/hooks';
 import { isEmptyArray } from '@/utils/utils';
 import { FORM_ITEM_TYPE } from '@/common/enum';
 import { PATTERN } from '@/common/pattern';
@@ -710,7 +734,9 @@ export default TemplatesForm;`;
 
 const defaultFormExampleTemplate = ({ isProForm = false, params = [] }) => {
   // console.log(baseFormText(params))
-  return isProForm ? proFormText(params) : baseFormText(params);
+  const code = isProForm ? proFormText(params) : baseFormText(params);
+  const result = prettify(removeUnusedCode(code));
+  return result;
 };
 
 export default defaultFormExampleTemplate;
