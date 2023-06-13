@@ -28,7 +28,7 @@ export default async function handleApi(api, arr = [], options) {
 
     for (let i = 0; i < arr.length; i++) {
       const item = arr[i];
-      const r = createApi(item, options, false);
+      const r = createApi(item, options, false, templateContent);
       resultText += r;
     }
 
