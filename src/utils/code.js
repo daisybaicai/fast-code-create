@@ -18,47 +18,32 @@ export const removeUnusedCode = (str) => {
 
   traverse(ast, {
     // 处理 const var let
-    // VariableDeclaration(path) {
-    //   const { node } = path;
-    //   const { declarations } = node;
+    VariableDeclaration(path) {
+      const { node } = path;
+      const { declarations } = node;
 
-    //   node.declarations = declarations.filter((declaration) => {
-    //     const { id } = declaration;
-    //     if (t.isObjectPattern(id)) {
-    //       // path.scope.getBinding(name).referenced 判断变量是否被引用
-    //       // 通过filter移除掉没有使用的变量
-    //       id.properties = id.properties.filter((property) => {
-    //         const binding = path.scope.getBinding(property.key.name);
-    //         // referenced 变量是否被引用
-    //         // constantViolations 变量被重新定义的地方
-    //         const { referenced, constantViolations } = binding;
-    //         if (!referenced && constantViolations.length > 0) {
-    //           constantViolations.map((violationPath) => {
-    //             // 如果变量未使用过，被修改的语句也需要一起移除
-    //             violationPath.remove();
-    //           });
-    //         }
-    //         return referenced;
-    //       });
-    //       // 如果对象中所有变量都没有被应用，则该对象整个移除
-    //       return id.properties.length > 0;
-    //     } else {
-    //       // const a = 1;
-    //       const binding = path.scope.getBinding(id.name);
-    //       const { referenced, constantViolations } = binding;
-    //       if (!referenced && constantViolations.length > 0) {
-    //         constantViolations.map((violationPath) => {
-    //           violationPath.remove();
-    //         });
-    //       }
-    //       return referenced;
-    //     }
-    //   });
+      node.declarations = declarations.filter((declaration) => {
+        const { id } = declaration;
+        if (t.isIdentifier(id)) {
+          // 判断是否为指定变量名
+          if (['ACTION', 'defaultOptions'].includes(id.name)) {
+            // 查找变量绑定并判断是否被引用过
+            const binding = path.scope.getBinding(id.name);
+            if (binding && binding.references.length > 0) {
+              return true; // 变量被引用过，保留声明
+            } else {
+              return false; // 变量未被引用，移除该声明
+            }
+          }
+        }
+        return true; // 其他情况均保留声明
+      });
 
-    //   if (node.declarations.length === 0) {
-    //     path.remove();
-    //   }
-    // },
+      // 如果所有的声明都被移除了，则将当前节点从 AST 中删除
+      if (node.declarations.length === 0) {
+        path.remove();
+      }
+    },
     // 处理 import
     ImportDeclaration(path) {
       const { node } = path;
