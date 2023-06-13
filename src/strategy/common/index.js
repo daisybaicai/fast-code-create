@@ -77,7 +77,7 @@ export async function handleApi(absPath, jsonData, options) {
 
   const templateContent = await readFile(PrefixPath + fileName);
 
-  const createApiText = createApi(jsonData.api, options);
+  const createApiText = createApi(jsonData.api, options, true, templateContent);
   // 拼接
   await writeFile(PrefixPath + fileName, prettify(`${templateContent} ${createApiText}`))
 }

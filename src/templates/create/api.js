@@ -4,8 +4,9 @@ import {sliceApiUrl, urlTransform} from '../../utils/utils'
  * @param payload
  * @options
  * @checkParams 默认check， 如果不check，则走默认全部都生成相关params
+ * @templateContent 模板内容
  */
-export default function(payload, options, checkParams = true) {
+export default function(payload, options, checkParams = true, templateContent) {
   const { url, methods = 'GET', params = [], description } = payload;
 
   const upperMethods = methods.toUpperCase();
@@ -19,6 +20,11 @@ export default function(payload, options, checkParams = true) {
 
   // 参数类型 body / query
   const paramsInType = params.some(item => item.in === 'body') ? 'body' : 'query';
+
+  // 判断是否存在已经有functionName，已经有不增加
+  if (templateContent?.indexOf(functionName) > -1) {
+    return ``;
+  }
   
 
   const code = `
