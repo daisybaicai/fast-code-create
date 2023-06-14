@@ -29,11 +29,8 @@ export const removeUnusedCode = (str) => {
           if (['ACTION', 'defaultOptions'].includes(id.name)) {
             // 查找变量绑定并判断是否被引用过
             const binding = path.scope.getBinding(id.name);
-            if (binding && binding.references.length > 0) {
-              return true; // 变量被引用过，保留声明
-            } else {
-              return false; // 变量未被引用，移除该声明
-            }
+            // 只有有引用的会被保留
+            return binding.referenced;
           }
         }
         return true; // 其他情况均保留声明

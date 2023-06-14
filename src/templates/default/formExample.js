@@ -83,6 +83,11 @@ const FormItemGroup = React.memo(({ gutter = [20, 20], children, ...props }) => 
 const BaseForm = React.memo(
   forwardRef(({ readonly = false, value = {} }, ref) => {
     const [form] = Form.useForm();
+    const handleSubmit = (cb = () => {}) => {
+      form.validateFields().then((values) => {
+        cb(values);
+      });
+    };
     useImperativeHandle(ref, () => {
       return {
         submit: handleSubmit,
@@ -91,11 +96,6 @@ const BaseForm = React.memo(
         scrollToField: form.scrollToField,
       };
     });
-    const handleSubmit = (cb = () => {}) => {
-      form.validateFields().then((values) => {
-        cb(values);
-      });
-    };
 
     useEffect(() => {
       if (value && form && typeof form.setFieldsValue === 'function') {
@@ -681,6 +681,12 @@ const defaultOptions = [
 const TemplatesForm = React.memo(
   forwardRef(({ readonly = false, value = {} }, ref) => {
     const formRef = useRef();
+    const handleSubmit = (cb = () => {}) => {
+      formRef.current.validateFields().then((values) => {
+        cb(values);
+      });
+    };
+
     useImperativeHandle(ref, () => {
       return {
         submit: handleSubmit,
@@ -689,13 +695,7 @@ const TemplatesForm = React.memo(
         scrollToField: formRef.current?.scrollToField,
       };
     });
-    const proTableParams = useProTableParams(value?.list1, readonly);
 
-    const handleSubmit = (cb = () => {}) => {
-      formRef.current.validateFields().then((values) => {
-        cb(values);
-      });
-    };
 
     useEffect(() => {
       if (value && formRef && typeof formRef.current?.setFieldsValue === 'function') {
