@@ -2,9 +2,7 @@ import { FORM_ITEM_TYPE } from "../../common/enum";
 import { removeUnusedCode } from "../../utils/code";
 import { prettify } from "../../utils/utils";
 
-export const baseFormText = (
-  params
-) => `
+export const baseFormText = (params) => `
 import React, { forwardRef, useEffect, useImperativeHandle } from 'react';
 import QuillEditer from '@/components/QuillEditer';
 import { Checkbox, Col, Form, Input, InputNumber, Radio, Row, Select } from 'antd';
@@ -251,10 +249,18 @@ const baseRenderText = (params) => {
     if (!v.isFormItem) {
       return;
     }
-    if(v.formType === FORM_ITEM_TYPE.NUM_RANGE.code) {
-      result += `${renderFormItemType(v.formType, v)}`
+    if (v.formType === FORM_ITEM_TYPE.NUM_RANGE.code) {
+      result += `${renderFormItemType(v.formType, v)}`;
       return;
     }
+
+    const shouldSelect = [
+      FORM_ITEM_TYPE.CASCADER.code,
+      FORM_ITEM_TYPE.DATE.code,
+      FORM_ITEM_TYPE.CHECKBOX.code,
+      FORM_ITEM_TYPE.RADIO.code,
+      FORM_ITEM_TYPE.SELECT.code,
+    ].includes(v.formType);
 
     result += `
     <Form.Item
@@ -269,7 +275,9 @@ const baseRenderText = (params) => {
         }`
       }}
       rules={getNormalRules('${v.description}', {
+        ${shouldSelect ? `select: true,` : ""}
         ${v.formPattern ? `pattern: PATTERN.${v.formPattern},` : ""}
+        ${v.formType === FORM_ITEM_TYPE.TEXT_AREA.code ? `maxLen: 200,` : ""}
       })}
       validateFirst
     >
@@ -293,7 +301,6 @@ const proRenderText = (params) => {
   });
   return result;
 };
-
 
 const renderProFormItemType = (v) => {
   switch (v.formType) {
@@ -580,7 +587,7 @@ const renderProFormItemType = (v) => {
       </ProForm.Item>
     </Col>`;
     case FORM_ITEM_TYPE.RICH_TEXT.code:
-              return `
+      return `
               <Col ${
                 v.formCol === "8"
                   ? "{...FORM_LAYOUT}"
