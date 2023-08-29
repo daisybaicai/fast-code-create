@@ -53,7 +53,8 @@
 		"pretest": "npm run lint",
 		"test": "node ./test/runTest.js",
 		"build": "rm -rf dist && rollup -c rollup.config.js",
-		"start": "rm -rf dist && rollup -c rollup.config.js -w"
+		"start": "rm -rf dist && rollup -c rollup.config.js -w",
+		"tag-add": "chmod +x ./create_tag.sh && ./create_tag.sh"
 	},
 	"devDependencies": {
 		"@babel/preset-env": "7.16.8",
