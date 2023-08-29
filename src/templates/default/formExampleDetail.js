@@ -1,6 +1,22 @@
 import { prettify } from "../../utils/utils";
 
-const text = ({ fetchName, fileName }) => prettify(`import React, { useRef } from 'react';
+
+const addParams = (params) => {
+  const arr = params.filter(item => {
+    return Array.isArray(item.children) && item.children.length > 0;
+  });
+  if(arr.length <=0) {
+    return '';
+  }
+  let result = '={';
+  arr.forEach(v => {
+    result += `${v.name}:[{}],`
+  });
+  result+=`}`;
+  return result;
+}
+
+const text = ({ fetchName, fileName, params = [] }) => prettify(`import React, { useRef } from 'react';
 import { Button, Card, message, Popconfirm } from 'antd';
 import { PageContainer } from '@ant-design/pro-components';
 import { useMount, useRequest } from 'ahooks';
@@ -18,7 +34,7 @@ export default function Detail() {
   const formRef = useRef();
   const {
     loading,
-    data: detail,
+    data: detail ${addParams(params)},
     run: getDetail,
   } = useRequest(
     (v) =>
