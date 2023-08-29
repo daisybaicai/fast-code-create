@@ -2,10 +2,21 @@ import { FORM_ITEM_TYPE } from "../../common/enum";
 import { removeUnusedCode } from "../../utils/code";
 import { prettify } from "../../utils/utils";
 
+const FORM_ARR_TYPE = {
+  FORM_LIST: {
+    code: "FORM_LIST",
+    desc: "formList",
+  },
+  OBJECT: {
+    code: 'OBJECT',
+    desc: 'object'
+  }
+};
+
 export const baseFormText = (params) => `
 import React, { forwardRef, useEffect, useImperativeHandle } from 'react';
 import QuillEditer from '@/components/QuillEditer';
-import { Checkbox, Col, Form, Input, InputNumber, Radio, Row, Select } from 'antd';
+import { Checkbox, Col, Form, Input, InputNumber, Radio, Row, Select, Card, Space, Button } from 'antd';
 import { EditableProTable, ProFormDigitRange } from '@ant-design/pro-components';
 import ApplyItem from '@/components/ApplyItem';
 import loadApplyItem from '@/components/ApplyItem/loadApplyItem';
@@ -19,6 +30,8 @@ import { isEmptyArray } from '@/utils/utils';
 import { FORM_ITEM_TYPE } from '@/common/enum';
 import { PATTERN } from '@/common/pattern';
 import { getNormalRules } from '@/common/project';
+import FormItemGroup from '@/components/FormItemGroup';
+
 
 const FORM_LAYOUT = {
   sm: 24,
@@ -26,7 +39,6 @@ const FORM_LAYOUT = {
   xl: 8,
 };
 
-const ACTION = \`https://mock.apifox.cn/m1/1961007-0-default/api/v1/file/upload\`;
 const defaultOptions = [
   {
     value: 'zhejiang',
@@ -46,37 +58,6 @@ const defaultOptions = [
   },
 ];
 
-const FormItemGroup = React.memo(({ gutter = [20, 20], children, ...props }) => {
-  const renderItem = (v) => {
-    const {
-      props: { colProps = {}, label = '', ...extraProps },
-      key = '',
-      ...extraEleProps
-    } = v;
-    const child = {
-      ...extraEleProps,
-      key,
-      props: {
-        label,
-        ...extraProps,
-      },
-    };
-    return (
-      <Col {...colProps} key={key || label}>
-        {child}
-      </Col>
-    );
-  };
-  return (
-    <Row gutter={gutter} {...props}>
-      {children instanceof Array ? (
-        <>{children.map((v, index) => renderItem(v))}</>
-      ) : (
-        renderItem(children)
-      )}
-    </Row>
-  );
-});
 
 const BaseForm = React.memo(
   forwardRef(({ readonly = false, value = {} }, ref) => {
@@ -115,9 +96,7 @@ const BaseForm = React.memo(
         initialValues={value}
         requiredMark={!readonly}
       >
-        <FormItemGroup>
-          ${baseRenderText(params)}
-        </FormItemGroup>
+        ${baseRenderText(params)}
       </Form>
     );
   }),
@@ -223,7 +202,6 @@ const renderFormItemType = (type, v) => {
                 fileLen={1}
                 limitSize={20}
                 uploadType={UPLOAD_TYPE.BUTTON.code}
-                action={ACTION}
                 tooltipTitle="仅支持.pdf,.doc,.docx后缀的文件，文件大小不得超过20M"
                 readonly={readonly}
               />`;
@@ -242,11 +220,133 @@ const renderFormItemType = (type, v) => {
   }
 };
 
-const baseRenderText = (params) => {
+const renderFormListWrapper = (v, childrenText) => {
+  return `
+  <Card title="${v.description}">
+    <Form.List name="${v.name}">
+      {(fields, { add, remove }) => (
+        <div>
+          {fields.map((field) => (
+            <>
+              <FormItemGroup>
+                ${childrenText}
+
+                <Col colProps={{ ...FORM_LAYOUT, xl: 24, marginBottom: 20 }}>
+                {!readonly && (
+                  <Space style={{ width: '100%', justifyContent: 'flex-end' }}>
+                    <Button onClick={() => add()}>
+                      添加
+                    </Button>
+                    {fields.length > 1 && (
+                      <Button onClick={() => remove(field.name)}>
+                        删除
+                      </Button>
+                    )}
+                  </Space>
+                )}
+                </Col>
+              </FormItemGroup>
+            </>
+          ))}
+        </div>
+      )}
+    </Form.List>
+  </Card>
+  `;
+};
+
+const renderProFormListWrapper = (v, childrenText) => {
+  return `
+  <ProCard title="${v.description}">
+    <ProFormList
+        name="${v.name}"
+        alwaysShowItemLabel
+        copyIconProps={!readonly && { Icon: SmileOutlined, tooltipText: '复制此行到末尾' }}
+        deleteIconProps={
+          !readonly && {
+            Icon: CloseCircleOutlined,
+            tooltipText: '不需要这行了',
+          }
+        }
+      >
+      <ProForm.Group>
+        ${childrenText}
+      </ProForm.Group>
+    </ProFormList>
+  </ProCard>
+  `;
+};
+
+const baseRenderText = (params, parentFormType = "") => {
   let result = "";
-  params.forEach((v) => {
-    // 跳过非formItem的字段
-    if (!v.isFormItem) {
+  const paramsBasic = params.filter(
+    (v) => !(Array.isArray(v.children) && v.children.length > 0)
+  );
+  const paramsArray = params.filter(
+    (v) => Array.isArray(v.children) && v.children.length > 0
+  );
+
+  if (parentFormType !== FORM_ARR_TYPE.FORM_LIST.code) {
+    result += `<Card title="基本表单">
+    <FormItemGroup>`;
+  }
+
+  paramsBasic.forEach((v) => {
+    if (v.formType === FORM_ITEM_TYPE.NUM_RANGE.code) {
+      result += `${renderFormItemType(v.formType, v)}`;
+      return;
+    }
+
+    const shouldSelect = [
+      FORM_ITEM_TYPE.CASCADER.code,
+      FORM_ITEM_TYPE.DATE.code,
+      FORM_ITEM_TYPE.CHECKBOX.code,
+      FORM_ITEM_TYPE.RADIO.code,
+      FORM_ITEM_TYPE.SELECT.code,
+    ].includes(v.formType);
+
+    const renderFormItemName = () => {
+      if (parentFormType === FORM_ARR_TYPE.FORM_LIST.code) {
+        return `{[field.name, "${v.name}"]}`;
+      }
+      return `"${v.name}"`;
+    };
+
+    result += `
+    <Form.Item
+      name=${renderFormItemName()}
+      label="${v.description}"
+      colProps={${
+        v.formCol === "8"
+          ? "FORM_LAYOUT"
+          : `{
+          ...FORM_LAYOUT,
+          xl: ${v.formCol}
+        }`
+      }}
+      rules={getNormalRules('${v.description}', {
+        ${shouldSelect ? `select: true,` : ""}
+        ${v.formPattern ? `pattern: PATTERN.${v.formPattern},` : ""}
+        ${v.formType === FORM_ITEM_TYPE.TEXT_AREA.code ? `maxLen: 200,` : ""}
+      })}
+      validateFirst
+    >
+      {loadApplyItem(${renderFormItemType(v.formType, v)}, !readonly)}
+    </Form.Item>
+    `;
+  });
+
+  if (parentFormType !== FORM_ARR_TYPE.FORM_LIST.code) {
+    result += `</FormItemGroup>
+    </Card>`;
+  }
+
+  paramsArray.forEach((v) => {
+    if (Array.isArray(v.children) && v.children.length > 0) {
+      result += renderFormListWrapper(
+        v,
+        baseRenderText(v.children, FORM_ARR_TYPE.FORM_LIST.code)
+      );
       return;
     }
     if (v.formType === FORM_ITEM_TYPE.NUM_RANGE.code) {
@@ -262,9 +362,16 @@ const baseRenderText = (params) => {
       FORM_ITEM_TYPE.SELECT.code,
     ].includes(v.formType);
 
+    const renderFormItemName = () => {
+      if (parentFormType === FORM_ARR_TYPE.FORM_LIST.code) {
+        return `{[field.name, "${v.name}"]}`;
+      }
+      return `"${v.name}"`;
+    };
+
     result += `
     <Form.Item
-      name="${v.name}"
+      name=${renderFormItemName()}
       label="${v.description}"
       colProps={${
         v.formCol === "8"
@@ -288,17 +395,40 @@ const baseRenderText = (params) => {
   return result;
 };
 
-const proRenderText = (params) => {
+const proRenderText = (params, parentFormType = "") => {
   let result = "";
-  params.forEach((v) => {
-    // 跳过非formItem的字段
-    if (!v.isFormItem) {
-      return;
-    }
+  const paramsBasic = params.filter(
+    (v) => !(Array.isArray(v.children) && v.children.length > 0)
+  );
+  const paramsArray = params.filter(
+    (v) => Array.isArray(v.children) && v.children.length > 0
+  );
+
+  if (parentFormType !== FORM_ARR_TYPE.FORM_LIST.code) {
+    result += `<ProCard title="基本表单">
+    <ProForm.Group>`;
+  }
+
+  paramsBasic.forEach((v) => {
     result += `
     ${renderProFormItemType(v)}
     `;
   });
+
+  if (parentFormType !== FORM_ARR_TYPE.FORM_LIST.code) {
+    result += `
+    </ProForm.Group> 
+    </ProCard>`;
+  }
+  paramsArray.forEach((v) => {
+    result += `
+    ${renderProFormListWrapper(
+      v,
+      proRenderText(v.children, FORM_ARR_TYPE.FORM_LIST.code)
+    )}
+    `;
+  });
+
   return result;
 };
 
@@ -325,7 +455,7 @@ const renderProFormItemType = (v) => {
     case FORM_ITEM_TYPE.SELECT.code:
       return `           <ProFormSelect
       name="${v.name}"
-      label="${v.description}}"
+      label="${v.description}"
       colProps={${
         v.formCol === "8"
           ? "FORM_LAYOUT"
@@ -350,7 +480,7 @@ const renderProFormItemType = (v) => {
     case FORM_ITEM_TYPE.RADIO.code:
       return `          <ProFormRadio.Group
       name="${v.name}"
-      label="${v.description}}"
+      label="${v.description}"
       colProps={${
         v.formCol === "8"
           ? "FORM_LAYOUT"
@@ -379,7 +509,7 @@ const renderProFormItemType = (v) => {
     case FORM_ITEM_TYPE.CHECKBOX.code:
       return `<ProFormCheckbox.Group
       name="${v.name}"
-      label="${v.description}}"
+      label="${v.description}"
       colProps={${
         v.formCol === "8"
           ? "FORM_LAYOUT"
@@ -396,7 +526,7 @@ const renderProFormItemType = (v) => {
       return `
       <ProFormTextArea
       name="${v.name}"
-      label="${v.description}}"
+      label="${v.description}"
       colProps={${
         v.formCol === "8"
           ? "FORM_LAYOUT"
@@ -422,7 +552,7 @@ const renderProFormItemType = (v) => {
       >
       <ProForm.Item
         name="${v.name}"
-        label="${v.description}}"
+        label="${v.description}"
         rules={getNormalRules('${v.description}', {
           pattern: PATTERN.EMAIL,
           validateLen: false,
@@ -444,7 +574,7 @@ const renderProFormItemType = (v) => {
       }>
       <ProForm.Item
           name="${v.name}"
-          label="${v.description}}"
+          label="${v.description}"
           rules={getNormalRules('${v.description}', {
             select: true,
           })}
@@ -494,7 +624,7 @@ const renderProFormItemType = (v) => {
       return `<ProFormDigit
       fieldProps={{ precision: 0 }}
       name="${v.name}"
-      label="${v.description}}"
+      label="${v.description}"
       colProps={${
         v.formCol === "8"
           ? "FORM_LAYOUT"
@@ -520,7 +650,7 @@ const renderProFormItemType = (v) => {
       }>
       <ProForm.Item
       name="${v.name}"
-      label="${v.description}}"
+      label="${v.description}"
         rules={[
           {
             validator: (_, val) => {
@@ -539,7 +669,6 @@ const renderProFormItemType = (v) => {
           fileLen={1}
           limitSize={20}
           uploadType={UPLOAD_TYPE.BUTTON.code}
-          action={ACTION}
           tooltipTitle="仅支持.pdf,.doc,.docx后缀的文件，文件大小不得超过20M"
           readonly={readonly}
         />
@@ -558,7 +687,7 @@ const renderProFormItemType = (v) => {
       }>
       <ProForm.Item
       name="${v.name}"
-      label="${v.description}}"
+      label="${v.description}"
         rules={[
           {
             validator: (_, val) => {
@@ -598,7 +727,7 @@ const renderProFormItemType = (v) => {
               }>
               <ProForm.Item
                   name="${v.name}"
-                  label="${v.description}}"
+                  label="${v.description}"
                   rules={getNormalRules('${v.description}', {
                   })}
                 validateFirst
@@ -634,9 +763,12 @@ const renderProFormItemType = (v) => {
 export const proFormText = (params) => `
 import React, { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
 import { Col } from 'antd';
+import { CloseCircleOutlined, SmileOutlined } from '@ant-design/icons';
 import QuillEditer from '@/components/QuillEditer';
 import {
   EditableProTable,
+  ProCard,
+  ProFormList,
   ProForm,
   ProFormCheckbox,
   ProFormDigit,
@@ -665,7 +797,6 @@ const FORM_LAYOUT = {
   xl: 8,
 };
 
-const ACTION = \`https://mock.apifox.cn/m1/1961007-0-default/api/v1/file/upload\`;
 const defaultOptions = [
   {
     value: 'zhejiang',
@@ -729,9 +860,7 @@ const TemplatesForm = React.memo(
         initialValues={value}
         requiredMark={!readonly}
       >
-        <ProForm.Group>
-          ${proRenderText(params)}
-        </ProForm.Group>
+        ${proRenderText(params)}
       </ProForm>
     );
   }),

@@ -155,7 +155,8 @@ export async function handleComponents(absPath, jsonData, type, options) {
     console.log('PrefixPath', PrefixPath, formFileName)
     await writeFile(PrefixPath, defaultFormExampleDetailTemplate({
       fetchName,
-      fileName: formFileName
+      fileName: formFileName,
+      params: api.params
     }))
 
   } else {
