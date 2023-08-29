@@ -4,11 +4,11 @@ import { prettify } from "../../utils/utils";
 
 const FORM_ARR_TYPE = {
   FORM_LIST: {
-    code: "FORM_LIST",
+    code: "array",
     desc: "formList",
   },
   OBJECT: {
-    code: 'OBJECT',
+    code: 'object',
     desc: 'object'
   }
 };
@@ -221,6 +221,17 @@ const renderFormItemType = (type, v) => {
 };
 
 const renderFormListWrapper = (v, childrenText) => {
+  if(v.type === FORM_ARR_TYPE.OBJECT.code) {
+    return `
+    <Card title="${v.description}">
+      <FormItemGroup>
+        ${childrenText}
+      </FormItemGroup>
+    </Card>
+    `;
+  }
+
+
   return `
   <Card title="${v.description}">
     <Form.List name="${v.name}">
@@ -277,7 +288,18 @@ const renderProFormListWrapper = (v, childrenText) => {
   `;
 };
 
-const baseRenderText = (params, parentFormType = "") => {
+const renderFormItemName = (parentFormType, v, parentName) => {
+  if (parentFormType === FORM_ARR_TYPE.FORM_LIST.code) {
+    return `{[field.name, "${v.name}"]}`;
+  }
+  if(parentFormType === FORM_ARR_TYPE.OBJECT.code) {
+    return `{["${parentName}", "${v.name}"]}`;
+  }
+
+  return `"${v.name}"`;
+};
+
+const baseRenderText = (params, parentFormType = "", parentName = '') => {
   let result = "";
   const paramsBasic = params.filter(
     (v) => !(Array.isArray(v.children) && v.children.length > 0)
@@ -286,7 +308,7 @@ const baseRenderText = (params, parentFormType = "") => {
     (v) => Array.isArray(v.children) && v.children.length > 0
   );
 
-  if (parentFormType !== FORM_ARR_TYPE.FORM_LIST.code) {
+  if (!parentFormType) {
     result += `<Card title="基本表单">
     <FormItemGroup>`;
   }
@@ -305,16 +327,10 @@ const baseRenderText = (params, parentFormType = "") => {
       FORM_ITEM_TYPE.SELECT.code,
     ].includes(v.formType);
 
-    const renderFormItemName = () => {
-      if (parentFormType === FORM_ARR_TYPE.FORM_LIST.code) {
-        return `{[field.name, "${v.name}"]}`;
-      }
-      return `"${v.name}"`;
-    };
 
     result += `
     <Form.Item
-      name=${renderFormItemName()}
+      name=${renderFormItemName(parentFormType, v, parentName)}
       label="${v.description}"
       colProps={${
         v.formCol === "8"
@@ -336,7 +352,7 @@ const baseRenderText = (params, parentFormType = "") => {
     `;
   });
 
-  if (parentFormType !== FORM_ARR_TYPE.FORM_LIST.code) {
+  if (!parentFormType) {
     result += `</FormItemGroup>
     </Card>`;
   }
@@ -345,7 +361,8 @@ const baseRenderText = (params, parentFormType = "") => {
     if (Array.isArray(v.children) && v.children.length > 0) {
       result += renderFormListWrapper(
         v,
-        baseRenderText(v.children, FORM_ARR_TYPE.FORM_LIST.code)
+        baseRenderText(v.children, v.type, v.name),
+        v.type
       );
       return;
     }
@@ -362,16 +379,10 @@ const baseRenderText = (params, parentFormType = "") => {
       FORM_ITEM_TYPE.SELECT.code,
     ].includes(v.formType);
 
-    const renderFormItemName = () => {
-      if (parentFormType === FORM_ARR_TYPE.FORM_LIST.code) {
-        return `{[field.name, "${v.name}"]}`;
-      }
-      return `"${v.name}"`;
-    };
 
     result += `
     <Form.Item
-      name=${renderFormItemName()}
+      name=${renderFormItemName(parentFormType, v, parentName)}
       label="${v.description}"
       colProps={${
         v.formCol === "8"
