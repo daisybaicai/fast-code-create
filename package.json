@@ -2,7 +2,7 @@
 	"name": "fast-code-create",
 	"displayName": "fast-code-create",
 	"description": "a code generate with vue or react",
-	"version": "0.1.5",
+	"version": "0.1.6",
 	"engines": {
 		"vscode": "^1.0.0"
 	},
