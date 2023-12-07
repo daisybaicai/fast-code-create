@@ -28,7 +28,7 @@
 			"properties": {
 				"CodeCreate.url": {
 					"type": "string",
-					"default": "http://47.92.243.227:8082",
+					"default": "http://47.92.243.227:8083",
 					"description": "CodeCreate设计器远程URL"
 				}
 			}
