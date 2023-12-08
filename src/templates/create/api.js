@@ -39,6 +39,6 @@ export default function(payload, options, checkParams = true, templateContent) {
     }
   `;
 
-  console.log('code', code)
+  // console.log('code', code)
   return code;
 }

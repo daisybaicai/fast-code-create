@@ -29,9 +29,10 @@ const strategy = {
             throw err
         }
     },
-    "api" : function(api,arr, options) {
+    "api" : function(api,arr, servicePath, options) {
+        console.log('api', api, arr, options)
         try{
-            return handleApi(api,arr, options);
+            return handleApi(api,arr,options, servicePath);
         }catch(err){
             throw err
         }

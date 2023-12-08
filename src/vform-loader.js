@@ -28,12 +28,12 @@ function getWebViewContent(context, templatePath) {
 
 const methods = {
     writeFile: function (message, vscode, dirPath) {
-        let { fileName, code, text, options } = message.data
-        // let filePath = path.join(dirPath, fileName)
-        // fs.writeFileSync(filePath, code)
-        console.log('text1235', typeof text, text)
+        let { text, options } = message.data
+        console.log("🚀 ~ file: vform-loader.js:32 ~ message.data:", message.data)
         const result = JSON.parse(text);
         const {actionType} = result;
+
+
         strategy[actionType]({
             paths: {
                 absSrcPath: dirPath + '/src'
@@ -47,12 +47,13 @@ const methods = {
         vscode.window.showInformationMessage(`文件${text.slice(10)}创建成功`)
     },
     createApi: function(message, vscode, dirPath) {
-        let { arr = [], options } = message.data
+        let { arr = [], options, servicePath } = message.data
+        console.log("🚀 ~ file: vform-loader.js:51 ~ message.data:", message.data)
         strategy["api"]({
             paths: {
                 absSrcPath: dirPath + '/src'
             }
-        }, arr, options);
+        }, arr, servicePath, options);
     },
     openUrl: function (message, vscode, dirPath) {
         //vscode.window.showInformationMessage(message.data.url)
